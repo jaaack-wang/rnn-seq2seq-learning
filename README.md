@@ -1,21 +1,68 @@
-## Update
-
-The current research is under re-design and re-experimentation. Previously, I experimented with string reversal and string copying (or identity function). In new experiments, I am studying the capabilities of RNN seq2seq models in learning a  hierarchy of reduplicative functions (i.e., string copying, total reduplication, input-specified reduplication, corresponding to rational, regular, polyregular functions respectively). I will show that these tasks are discriminative of the generative capacity of RNNs, RNN seq2seq models, and RNN seq2seq models with attention and the architectural biases that come with them. (For example, pure RNN seq2seq models cannot learn identity function and the attentional counterparts can only learn this function for in-distrbution examples, namely, strings of unseen or close lengths. However, RNNs can learn such a task perfectly, depiste their inability to model non-rational functions) It is also found that RNN seq2seq models with attention are strong in-distribution learners with certain out-of-distribution generalization abilities. 
-
-You can also check this [rnn-transduction](https://github.com/jaaack-wang/rnn-transduction) repository for using RNNs to model string transducation tasks. 
-
-## Original Description
-
-This repository contains materials related to my paper on RNN seq2seq models learning non-regular transduction tasks. Source code, data, experimental results (including saved models), training logs, can also found in [this project folder](https://drive.google.com/drive/folders/1BO2LdbCFId3rY4BOX6Rcwn_m1WA8o912?usp=share_link) on Google Drive. 
-
-Here is a brief description of the meaning of each sub-folders inside [the project folder](https://drive.google.com/drive/folders/1BO2LdbCFId3rY4BOX6Rcwn_m1WA8o912?usp=share_link) on Google Drive:
-
-- ``data``: three versions of train/dev/test/generalization sets for reversed string and reduplicated string transduction tasks. Used for formal model training and evaluation. Results are reported. 
-- ``tuning_data``: two sets of train/dev sets for the learning tasks. Used for manually searching for optimal hyperparameters. Results are not reported. 
-- ``scripts``: code created for this project. 
-- ``notebooks``: training and hyperparameter searching logs for eight experiments.
-- ``Experiments_Logs``: experimental results of training and testing models on ``data``.
+In this project, I examine the capabilities of Recurrent-Neural-Network sequence to sequence (RNN seq2seq) models in learning four transduction tasks of varying complexity and that require alignments learning. Here is the [current draft](https://drive.google.com/file/d/1z2wjo2E2n9VVdZ_5kjlRPexTb4yw0OcW/view?usp=share_link).
 
 
 
-``notebooks`` and ``scripts`` are placed in this repository for temporary viewing. To be updated.
+The repository contains source code and the experimental notebooks for a quick overview. Please check [this project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj) On Google Drive to access the experimental results, including the raw results, those summarized results that are used in the paper, as well as the saved models for all the experiments. 
+
+
+
+## Transduction Tasks
+
+For a given string, the four transduction tasks can be defined as follows:
+
+- Identity: the given string itself. Ex: <i>abc ===> abc</i> 
+- Reversal: the reverse of the given string. Ex: <i>abc ===> cba</i> 
+- Total reduplication: two copies of the given string. Ex: <i>abc ===> abcabc</i>
+- Input specified reduplication: needs a specific number **N** of instruction symbols @ and produces as many extra copies of the given string as **N**. Ex: <i>abc@ ===> abc<ins>abc</ins></i>; <i>abc@@ ===> abc<ins>abcabc</ins></i>; <i>abc@@@ ===> abc<ins>abcabcabc</ins></i>
+
+These four functions have been traditionally studied under the viewpoint of Finite State Tranducers (FSTs) and characterized accordingly. The FST-theoretic characterizations propose the following complexity hierarchy for these tasks: Input specified reduplication (polyregular function) > Reversal, Total reduplication (both regular) > Identity (rational).
+
+
+
+## Alignments Learning
+
+However, RNN seq2seq models are not FSTs. <ins>RNN seq2seq models take an encoder-decoder structure, where the decoder only “writes” after the encoder “reads” all the input symbols, unlike the read-and-write operation seen in FSTs</ins>. 
+
+The following figure shows the conjectured mechanism for RNN seq2seq models learning identity and rever- sal functions. Other two functions can be learnt in a similar manner, and input specified reduplication additionally requires counting. I term such a learning process as **alignments learning**.
+
+
+
+ <p align='center'>
+ <img align="center" src="./imgs/alignments_learning.png">
+</p>
+
+
+
+## Basic Findings
+
+- **Generalization abilities**: RNN seq2seq models, attentional or not, are prone to learning a plausible function that fits the training or in-distribution. Their out-of-distribution generalization abilities are highly limited. <ins>In other words, they are not learning the underlying data generation functions</ins>. 
+- **Attention** makes learning alignments between input and target sequences significantly more efficient and robust, but does not solve the out-of-distribution generalization limitation. 
+- **RNN variants**: we found the attentional SRNN models have better out-of-distribution generalization abilities, but attention-less GRU and LSTM are generally more expressive. LSTM models, regardless of attention, show a stronger ability of counting. 
+
+- **Task complexity**: for attention-less RNN seq2seq models, it is empirically found that, total reduplication > identity > reversal, where > is a “more complex than” relation. We hypothesized that input specified reduplication is more complex than total reduplication, which, however, is not attested due to lack of computational resources to set out the experiments at a more proper scale. 
+
+  
+
+The following figure shows full-sequence accuracy (on unseen examples) per input length across the three types of RNN seq2seq models for the four tasks, where only input lengths 6-15 are seen during training.
+
+ <p align='center'>
+ <img align="center" src="./imgs/models_perf_across_tasks_per_len_full_sequence_accuracy.png">
+</p>
+
+
+
+## Reproduce the results
+
+To reproduce the results, simply download everything in [the project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj),  upload the folder to your Google Drive, and re-run the notebook in `notebooks`in a GPU runtime. Alternatively, you can also save the project folder to your Google Drive by using the "Add shortcut to Drive" function. In doing so, you should be able to run any of these notebooks successfully, but the results will not be saved on your Google Drive. 
+
+It is recommened that you subscribe to Google Pro+ in order to reproduce the results.
+
+
+
+## Reusing my code
+
+- [The project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj) provides a very neat but customizable pipeline to conduct experiments using RNN seq2seq models. Just make sure that your data is also saved in an identical format as the one provided inside the `data` folder. 
+
+- If you prefer highly customized codebase to run experiments on command line, consider the following two repositories of mine:
+  - [RNN Seq2seq transduction](https://github.com/jaaack-wang/rnn-transduction): nearly identical core codebase as used in my project!
+  - [RNN transduction](https://github.com/jaaack-wang/rnn-transduction):  model language transduction tasks using RNNs with a detailed tutorial. 

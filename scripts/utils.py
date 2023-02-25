@@ -1,8 +1,8 @@
 '''
-Author: Zhengxiang (Jack) Wang 
-GitHub: https://github.com/jaaack-wang
-Website: https://jaaack-wang.eu.org
-About: 
+- Author: Zhengxiang (Jack) Wang 
+- GitHub: https://github.com/jaaack-wang
+- Website: https://jaaack-wang.eu.org
+- About: General utility functions for handling files.
 '''
 import os
 from os import listdir, walk
@@ -10,23 +10,6 @@ from os.path import isfile, join, exists
 
 import random
 import json
-
-
-def _create_dir(path):
-    if not exists(path):
-        os.mkdir(path)
-        print(path + " created!")
-
-        
-def create_dir(path):
-    pathes = path.split("/")
-    if len(pathes) == 1:
-        _create_dir(path)
-    
-    cur_p = "."
-    for p in pathes:
-        cur_p = join(cur_p, p)
-        _create_dir(cur_p)
 
 
 def read_data(filepath, skip=0, sep="\t"):
@@ -37,7 +20,7 @@ def read_data(filepath, skip=0, sep="\t"):
         next(file)
     
     for line in file:
-        line = line.strip().split(sep)
+        line = line.strip("\n").split(sep)
         
         assert len(line) >= 2, "each line" \
         "must have two items separated by" \
@@ -46,6 +29,15 @@ def read_data(filepath, skip=0, sep="\t"):
         data.append([line[0], line[-1]])
 
     return data
+
+
+def read_datasets(data_folder):
+    train = read_data(join(data_folder, "train.txt"))
+    dev = read_data(join(data_folder, "dev.txt"))
+    test = read_data(join(data_folder, "test.txt"))
+    gen = read_data(join(data_folder, "gen.txt"))
+    
+    return train, dev, test, gen
 
 
 def save_ds_in_txt(ds, fp):
@@ -58,26 +50,16 @@ def save_ds_in_txt(ds, fp):
     f.close()
     print(fp + " saved!")
 
-def save_dict_as_json(dic, fp):
+
+def read_json(fp):
+    return json.load(open(fp, "r"))
+
+
+def save_dict_as_json(dic, fp, indent=4):
     with open(fp, "w") as f:
-        json.dump(dic, f)
+        json.dump(dic, f, indent=indent)
         print(fp + " saved!")
-
-
-def create_log_folders(expt_num, rnn_type):
-    log_folder = f"Experiments_Logs/Experiment#{expt_num}/{rnn_type}"
-    tr_log = join(log_folder, "Training_Logs")
-    te_log = join(log_folder, "Testing_Logs")
-    te1_log = join(te_log, "Test_Logs")
-    te2_log = join(te_log, "Test2_Logs")
-    mo_log = join(log_folder, "Models_Logs")
-    
-    for log in [log_folder, tr_log, te1_log, te2_log, mo_log]:
-        create_dir(log)
         
-    return log_folder, tr_log, te1_log, te2_log, mo_log
-
-
 
 def get_filepathes_from_dir(file_dir, include_sub_dir=False,
                             file_format=None, shuffle=False):

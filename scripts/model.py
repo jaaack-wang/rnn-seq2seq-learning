@@ -7,7 +7,6 @@ in PyTorch. Allows: attention, bidirectional RNN,
 as well as multilayered RNN etc.
 '''
 import random
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,7 +15,7 @@ import torch.nn.functional as F
 class Encoder(nn.Module):
     def __init__(self, 
                  in_vocab_size, hidden_size, 
-                 embd_dim, num_layers=1, rnn_type="RNN",
+                 embd_dim, num_layers=1, rnn_type="SRNN",
                  dropout_rate=0.0, bidirectional=False, 
                  reduction_method=torch.sum):
         super(Encoder, self).__init__()
@@ -28,7 +27,9 @@ class Encoder(nn.Module):
         self.bidirectional = bidirectional
         if self.rnn_type == "GRU": rnn_ = nn.GRU
         elif self.rnn_type == "LSTM": rnn_ = nn.LSTM
-        else: rnn_ = nn.RNN
+        elif self.rnn_type == "SRNN": rnn_ = nn.RNN
+        else: raise ValueError("Only supports SRNN, GRU, LSTM," \
+                               " but {self.rnn_type} was given.")
         self.rnn = rnn_(embd_dim, 
                         hidden_size, 
                         num_layers,
@@ -68,7 +69,7 @@ class Encoder(nn.Module):
         # hidden: (num layers, batch size, hidden size)
         # cell: (num layers, batch size, hidden size)
         return outputs, hidden, cell
-    
+
 
 class Attention(nn.Module):
     def __init__(self, hidden_size):
@@ -97,7 +98,7 @@ class Attention(nn.Module):
         attention = self.v(energy).squeeze(2)
         
         return F.softmax(attention, dim=1)
-    
+
 
 class Decoder(nn.Module):
     def __init__(self, 
@@ -113,7 +114,9 @@ class Decoder(nn.Module):
         self.use_attention = use_attention
         if self.rnn_type == "GRU": rnn_ = nn.GRU
         elif self.rnn_type == "LSTM": rnn_ = nn.LSTM
-        else: rnn_ = nn.RNN
+        elif self.rnn_type == "SRNN": rnn_ = nn.RNN
+        else: raise ValueError("Only supports SRNN, GRU, LSTM," \
+                               " but {self.rnn_type} was given.")
         if use_attention:
             self.rnn = rnn_(embd_dim + hidden_size, 
                             hidden_size, num_layers)
@@ -163,7 +166,7 @@ class Decoder(nn.Module):
         # output: (batch size, out vocab size)
         output = self.fc_out(output.squeeze(0))        
         return output, hidden, cell, attn_weights
-    
+
 
 class Seq2Seq(nn.Module):
     def __init__(self, encoder, decoder, device):
@@ -190,7 +193,6 @@ class Seq2Seq(nn.Module):
             if teacher_force: y = Y[t:t+1] 
             else: y = output.argmax(1).unsqueeze(0)
         
-        # outputs: (batch size * (max output seq len-1), out vocab size)
-        # 
+        # outputs: ((max output seq len-1) * batch size, out vocab size)
         outputs = torch.cat(outputs).to(self.device)
         return outputs, attn_weights
