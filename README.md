@@ -1,8 +1,6 @@
-In this project, I examine the capabilities of Recurrent-Neural-Network sequence to sequence (RNN seq2seq) models in learning four transduction tasks of varying complexity and that can be described as alignment learning.  The generalization abilities, the role of attention, the effect of RNN variants, and task complexity are studied. Here is the [preprint](https://arxiv.org/abs/2303.06841).
+The repository contains the source code and some of the experimental notebooks for [the paper](https://arxiv.org/abs/2303.06841) accepted at [the 16 ICGI](http://www.fsr.ac.ma/icgi2023/index.html), titled <i>Learning Transductions and Alignments with RNN Seq2seq Models</i>. Through unified training/evaluation conditions and comprehensive experiments, I compared the learning results across tasks, different model configurations, and generalization performance etc., and highlighted factors that influence the learning capabilities and generalization capacity of RNN seq2seq models.
 
-
-
-The repository contains source code and the experimental notebooks for a quick overview. Please check [this project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj) On Google Drive to access the experimental results, including the raw results, those summarized results that are used in the paper, as well as the saved models for all the experiments. 
+For more details or everything related to the experiments, including data, training logs, trained models, and experimental results, please  check [this project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj) On Google Drive.
 
 
 
@@ -13,9 +11,9 @@ For a given string, the four transduction tasks can be defined as follows:
 - Identity: the given string itself. Ex: <i>abc ===> abc</i> 
 - Reversal: the reverse of the given string. Ex: <i>abc ===> cba</i> 
 - Total reduplication: two copies of the given string. Ex: <i>abc ===> abcabc</i>
-- Input specified reduplication: needs a specific number **N** of instruction symbols @ and produces as many extra copies of the given string as **N**. Ex: <i>abc@ ===> abc<ins>abc</ins></i>; <i>abc@@ ===> abc<ins>abcabc</ins></i>; <i>abc@@@ ===> abc<ins>abcabcabc</ins></i>
+- Quadratic copying: make `n` copies of the given string of length `n`. Ex: <i>abc ===> abcabcabc</i>   
 
-These four functions have been traditionally studied under the viewpoint of Finite State Tranducers (FSTs) and characterized accordingly. The FST-theoretic characterizations propose the following complexity hierarchy for these tasks: Input specified reduplication (polyregular function) > Reversal, Total reduplication (both regular) > Identity (rational).
+These four functions have been traditionally studied under the viewpoint of Finite State Tranducers (FSTs) and characterized accordingly. The FST-theoretic characterizations propose the following complexity hierarchy for these tasks: quadratic copying (polyregular function) > total reduplication (regular) > reversal (regular) > identity (rational).
 
 
 
@@ -35,11 +33,15 @@ The following figure shows the conjectured mechanism for RNN seq2seq models lear
 
 ## Basic Findings
 
-- **Generalization abilities**: RNN seq2seq models, attentional or not, are prone to learning a function that fits the training or in-distribution data. Their out-of-distribution generalization abilities are highly limited. <ins>In other words, they are not learning the underlying data generation functions</ins>. 
-- **Attention**: makes learning alignment between input and target sequences significantly more efficient and robust, but does not solve the out-of-distribution generalization limitation. 
-- **RNN variants**: we found the attentional SRNN models have better out-of-distribution generalization abilities, but attention-less GRU and LSTM are generally more expressive. LSTM models, regardless of attention, show a stronger ability of counting. 
+- **Generalization abilities**: RNN seq2seq models, attentional or not, are prone to learning a function that fits the training or in-distribution data. Their out-of-distribution generalization abilities are highly limited. <ins>In other words, they are not learning the underlying data generation functions</ins>, probably because of the inherent limitation of auto-regressive models. 
 
-- **Task complexity**: for attention-less RNN seq2seq models, it is empirically found that, total reduplication > identity > reversal, where > is a “more complex than” relation. We hypothesized that input specified reduplication is more complex than total reduplication, which, however, is not attested due to lack of computational resources to set out the experiments at a more proper scale. 
+  - Please note that, task complexity is strongly tied to the structure of the learner. For example, RNNs of few hundred parameters can easily learn the function of identity whereas RNNs seq2seq models cannot. See: [RNNs-learn-identity](https://github.com/jaaack-wang/RNNs-learn-identity).
+
+- **Attention**: makes learning alignment between input and target sequences significantly more efficient and robust, but does not overcome the out-of-distribution generalization limitation. 
+
+- **Task complexity**: for attention-less RNN seq2seq models, it is empirically found that quadratic copying > total reduplication > identity > reversal. The relative complexity between identity and reversal is due to the long-term dependency learning issue that comes with RNNs trained with gradient descent and backpropagation. 
+
+- **RNN variants**: The effect of RNN variants on the seq2seq models is a complicated one and interacts with other factors, e.g., attention and the task to learn. Generally, GRU and LSTM are generally more expressive than SRNN. SRNN cannot count. 
 
   
 
@@ -54,7 +56,7 @@ The following figure shows full-sequence accuracy (on unseen examples) per input
 
 ## Reproduce the results
 
-To reproduce the results, simply download everything in [the project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj),  upload the folder to your Google Drive, and re-run the notebook in `notebooks`in a GPU runtime. Alternatively, you can also save the project folder to your Google Drive by using the "Add shortcut to Drive" function. In doing so, you should be able to run any of these notebooks successfully, but the results will not be saved on your Google Drive. 
+To reproduce the results, simply download everything in [the project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj),  upload the folder to your Google Drive, and re-run the notebook in `notebooks` in a GPU runtime. Alternatively, you can also save the project folder to your Google Drive by clicking the "Add shortcut to Drive" button. In doing so, you should be able to run any of these notebooks successfully, but the results will not be saved on your Google Drive (unless you download the entire folder and upload it to your Google Drive). 
 
 It is recommened that you subscribe to Google Pro+ in order to reproduce the results.
 
