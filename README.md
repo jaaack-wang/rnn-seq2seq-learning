@@ -1,6 +1,6 @@
 The repository contains the source code, data, and some of the experimental notebooks for [the paper](https://arxiv.org/abs/2303.06841) accepted at [the 16 ICGI](http://www.fsr.ac.ma/icgi2023/index.html), titled <i>Learning Transductions and Alignments with RNN Seq2seq Models</i>. Through unified training/evaluation conditions and comprehensive experiments, I compared the learning results across tasks, different model configurations, and generalization performance etc., and highlighted factors that influence the learning capabilities and generalization capacity of RNN seq2seq models.
 
-For more details or everything related to the experiments, including data, training logs, trained models, and experimental results, please  check [this project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj) On Google Drive.
+For more details or everything related to the experiments, including data, training logs, trained models, and experimental results, please check [this project folder](https://drive.google.com/drive/u/0/folders/1R47r-YGgU02H3DOW43A-JENmwZJCSVQj) On Google Drive or [this OSF project](https://osf.io/rv8qw/) (to be updated). 
 
 
 
